@@ -30,7 +30,7 @@ public class DataProcessManager {
 		return ipAndLocationPojos;
 	}
 	
-	
+	//将对象的集合形式 转换为 数组形式 并 进行排序
 	public static IPAndLocationPojo[] convertListToArrayAndSort(List<IPAndLocationPojo> pojos) {
 		IPAndLocationPojo[] ipAndLocationPojos =new IPAndLocationPojo[pojos.size()];
 		pojos.toArray(ipAndLocationPojos);
