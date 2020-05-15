@@ -3,10 +3,11 @@ package com.tledu.aaa.util;
 public class IPUtil {
 	
 	public static void main(String[] args) {
-		String ip="123.123.123.123";
+		String ip="0.0.0.0";
 		long longIP = ipToLong(ip);
 		String ipp= longToIp(longIP);
-		System.out.println(ipp+" ---"+ip+"---"+longIP);
+		String ip1 = longToIp(16778238);
+		System.out.println(ipp+" ---"+ip+"---"+longIP+"   ---"+ip1);
 	}
 	
 	public static long ipToLong(String ipString) {
