@@ -1,5 +1,6 @@
 package com.tledu.aaa.manger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,28 +9,46 @@ import java.util.List;
 import com.tledu.aaa.pojo.IPAndLocationPojo;
 import com.tledu.aaa.util.FileOperatorUtil;
 import com.tledu.aaa.util.IPUtil;
+import com.tledu.aaa.util.RegexUtil;
+import com.tledu.aaa.util.SerDeUtil;
+import com.tledu.aaa.util.StaticValue;
 
 /**
  * 该类为项目数据处理管理类,衔接各个模块的输入输出 进行有机组合
  * 
  */
 public class DataProcessManager {
-	public static void main(String[] args) {
-		String ip = "124.125.8.6";
-		String location = DataProcessManager.getLocation(ip);
-		System.out.println(location);
-	}
+	
 	private static IPAndLocationPojo[] ipArray =null;
 	static{
-		String filePath ="ip_location_relation.txt";
-		String encoding="utf-8";
+		// 业务二分法测试
 		List<IPAndLocationPojo> pojoList;
-		try {
-			pojoList = DataProcessManager.getPojoList(filePath, encoding);
-			ipArray=DataProcessManager.convertListToArrayAndSort(pojoList);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
+		// 判断序列化文件是否存在
+		boolean isinitFlag =new File(StaticValue.serde_obj_filepath).exists();
+		if (isinitFlag) {
+			long startMs = System.currentTimeMillis();
+			Object object;
+			try {
+				object = SerDeUtil.getObj(StaticValue.serde_obj_filepath, StaticValue.cacheByteArrayLength);
+				ipArray = (IPAndLocationPojo[]) object;
+				long endMS = System.currentTimeMillis();
+				System.out.println("反序列化用时 : " + (endMS - startMs));
+			} catch (IOException|ClassNotFoundException e) {
+				e.printStackTrace();
+			}		
+		}else {
+			// 不存在 就初始化 并写出
+			try {
+				long startMS = System.currentTimeMillis();
+				pojoList = DataProcessManager.getPojoList(StaticValue.ip_lib_filepath, StaticValue.default_encoding);
+				ipArray=DataProcessManager.convertListToArrayAndSort(pojoList);
+				SerDeUtil.saveObj(ipArray, StaticValue.serde_obj_filepath, StaticValue.cacheByteArrayLength);
+				long endMS = System.currentTimeMillis();
+				System.out.println("序列化用时 : " + (endMS - startMS));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}	
+		}		
 	}
 	
 	public static List<IPAndLocationPojo> getPojoList(String filePath,String encoding) throws IOException{
@@ -85,6 +104,9 @@ public class DataProcessManager {
 	
 	//对外提供接口,入参IP 出参归属地
 	public static String getLocation(String ip) {
+		if (!RegexUtil.isValidIP(ip)) {
+			return "请保证输入IP地址的格式正确性!!";
+		}
 		int startIndex = 0;
 		int endIndex = ipArray.length-1;
 		int resultIndex = DataProcessManager.binaraySearchIpPojo(ipArray, ip, startIndex, endIndex);

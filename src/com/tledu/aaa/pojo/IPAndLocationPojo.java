@@ -1,10 +1,16 @@
 package com.tledu.aaa.pojo;
 
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+
+import com.tledu.aaa.util.Base64Util;
 import com.tledu.aaa.util.IPUtil;
 
-public class IPAndLocationPojo implements Comparable<IPAndLocationPojo>{
-	private String startIP;
-	private String endIP;
+public class IPAndLocationPojo implements Comparable<IPAndLocationPojo>,Serializable{
+
+	private static final long serialVersionUID = 1L;
+	private transient String startIP;
+	private transient String endIP;
 	private String location;
 	
 	// 衍生字段
@@ -36,6 +42,11 @@ public class IPAndLocationPojo implements Comparable<IPAndLocationPojo>{
 		this.endIP = endIP;
 	}
 	public String getLocation() {
+		try {
+			return Base64Util.decode(location);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		return location;
 	}
 	public void setLocation(String location) {
@@ -45,7 +56,11 @@ public class IPAndLocationPojo implements Comparable<IPAndLocationPojo>{
 		super();
 		this.startIP = startIP;
 		this.endIP = endIP;
-		this.location = location;
+		try {
+			this.location = Base64Util.encode(location);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		this.startIPLong = IPUtil.ipToLong(startIP);
 		this.endIPLong=IPUtil.ipToLong(endIP);
 	}
